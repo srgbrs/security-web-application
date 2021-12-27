@@ -44,7 +44,8 @@ namespace web_storage
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddPasswordValidator<LoginPasswordMatchingValidator<WebStorageUser>>()
-                .AddPasswordValidator<CommonPasswordUsageValidator<WebStorageUser>>();
+                .AddPasswordValidator<CommonPasswordUsageValidator<WebStorageUser>>()
+                .AddUserStore<EncodedUserStore<WebStorageUser>>();
             
             services.Configure<IdentityOptions>(options =>
             {
