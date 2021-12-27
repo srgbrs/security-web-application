@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using web_storage.Data;
 
-namespace web_storage.Data.Migrations
+namespace web_storage.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211227213942_WebStorageUser")]
-    partial class WebStorageUser
+    [Migration("20211227232621_base")]
+    partial class @base
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -168,9 +168,6 @@ namespace web_storage.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("EncryptedPhoneNumber")
-                        .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
