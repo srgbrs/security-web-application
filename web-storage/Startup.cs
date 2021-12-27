@@ -20,6 +20,7 @@ namespace web_storage
 {
     using Areas;
     using ScottBrady91.AspNetCore.Identity;
+    using Sodium;
 
     public class Startup
     {
@@ -51,7 +52,7 @@ namespace web_storage
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequiredLength = 8;
                 options.Password.RequiredUniqueChars = 3;
 
@@ -65,10 +66,11 @@ namespace web_storage
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<WeatherForecastService>();
             
-            services.AddScoped<IPasswordHasher<IdentityUser>, Argon2PasswordHasher<IdentityUser>>();
-            services.Configure<Argon2PasswordHasherOptions>(options =>
+            services.AddScoped<IPasswordHasher<IdentityUser>, ArgonSha3PasswordHasher<IdentityUser>>();
+            services.Configure<ArgonSha3PasswordHasherOptions>(options =>
             {
-                options.Strength = Argon2HashStrength.Moderate;
+                options.ArgonStrength = PasswordHash.StrengthArgon.Moderate;
+                options.Sha3BitLength = 512;
             });
         }
 
