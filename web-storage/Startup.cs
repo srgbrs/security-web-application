@@ -18,6 +18,7 @@ using web_storage.Data;
 
 namespace web_storage
 {
+    using Areas;
     using ScottBrady91.AspNetCore.Identity;
 
     public class Startup
@@ -41,7 +42,21 @@ namespace web_storage
                     options.SignIn.RequireConfirmedAccount = true;
                     
                 })
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddPasswordValidator<LoginPasswordMatchingValidator<IdentityUser>>()
+                .AddPasswordValidator<CommonPasswordUsageValidator<IdentityUser>>();
+            
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 3;
+
+                options.SignIn.RequireConfirmedEmail = true;
+            });
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services
