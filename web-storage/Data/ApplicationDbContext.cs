@@ -6,11 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace web_storage.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    using Areas.Identity;
+
+    public class ApplicationDbContext : IdentityDbContext<WebStorageUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
         }
     }
 }

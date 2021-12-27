@@ -19,7 +19,6 @@ using web_storage.Data;
 namespace web_storage
 {
     using Areas;
-    using ScottBrady91.AspNetCore.Identity;
     using Sodium;
 
     public class Startup
@@ -38,14 +37,14 @@ namespace web_storage
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options =>
+            services.AddDefaultIdentity<WebStorageUser>(options =>
                 {
                     options.SignIn.RequireConfirmedAccount = true;
                     
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddPasswordValidator<LoginPasswordMatchingValidator<IdentityUser>>()
-                .AddPasswordValidator<CommonPasswordUsageValidator<IdentityUser>>();
+                .AddPasswordValidator<LoginPasswordMatchingValidator<WebStorageUser>>()
+                .AddPasswordValidator<CommonPasswordUsageValidator<WebStorageUser>>();
             
             services.Configure<IdentityOptions>(options =>
             {
@@ -60,13 +59,12 @@ namespace web_storage
             });
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services
-                .AddScoped<AuthenticationStateProvider,
-                    RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+            services.AddScoped<AuthenticationStateProvider,
+                    RevalidatingIdentityAuthenticationStateProvider<WebStorageUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<WeatherForecastService>();
             
-            services.AddScoped<IPasswordHasher<IdentityUser>, ArgonSha3PasswordHasher<IdentityUser>>();
+            services.AddScoped<IPasswordHasher<WebStorageUser>, ArgonSha3PasswordHasher<WebStorageUser>>();
             services.Configure<ArgonSha3PasswordHasherOptions>(options =>
             {
                 options.ArgonStrength = PasswordHash.StrengthArgon.Moderate;
