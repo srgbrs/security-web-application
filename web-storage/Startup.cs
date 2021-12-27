@@ -18,6 +18,8 @@ using web_storage.Data;
 
 namespace web_storage
 {
+    using ScottBrady91.AspNetCore.Identity;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -34,7 +36,11 @@ namespace web_storage
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<IdentityUser>(options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = true;
+                    
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -43,6 +49,12 @@ namespace web_storage
                     RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<WeatherForecastService>();
+            
+            services.AddScoped<IPasswordHasher<IdentityUser>, Argon2PasswordHasher<IdentityUser>>();
+            services.Configure<Argon2PasswordHasherOptions>(options =>
+            {
+                options.Strength = Argon2HashStrength.Moderate;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
