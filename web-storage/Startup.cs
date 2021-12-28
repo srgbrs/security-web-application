@@ -18,7 +18,11 @@ using web_storage.Data;
 
 namespace web_storage
 {
+    using System.IO;
     using Areas;
+    using Microsoft.AspNetCore.DataProtection;
+    using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+    using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
     using Sodium;
 
     public class Startup
@@ -71,6 +75,13 @@ namespace web_storage
                 options.ArgonStrength = PasswordHash.StrengthArgon.Moderate;
                 options.Sha3BitLength = 512;
             });
+
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(@"/keys/"))
+                .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
+                {
+                    EncryptionAlgorithm = EncryptionAlgorithm.AES_256_GCM
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
