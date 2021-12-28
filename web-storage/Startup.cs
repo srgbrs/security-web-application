@@ -79,14 +79,15 @@ namespace web_storage
             var blobName = "database-key-blob";
 
             services.AddDataProtection()
-                .PersistKeysToAzureBlobStorage(connectionString, containerName, blobName)
+                /*.PersistKeysToAzureBlobStorage(connectionString, containerName, blobName)
                 .ProtectKeysWithAzureKeyVault(
                     new Uri(
                         "https://kpi-sads-key-vault.vault.azure.net/keys/sads-vault-key-rsa/502643d5b0784121ac64140bb05ab94f"),
-                    new DefaultAzureCredential())
+                    new DefaultAzureCredential())*/
+                .PersistKeysToFileSystem(new DirectoryInfo("~/keys/"))
                 .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
                 {
-                    EncryptionAlgorithm = EncryptionAlgorithm.AES_256_GCM
+                    EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC
                 });
         }
 
