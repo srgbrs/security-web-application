@@ -1,9 +1,16 @@
 @page "/"
+@using web_storage.Areas.Identity
+@using Microsoft.AspNetCore.Identity
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject UserManager<WebStorageUser> userManager;
 
 <AuthorizeView>
     <Authorized>
         <h1>Hello, @context.User.Identity.Name!</h1>
-        Welcome to index page of authorized user.
+        <h4>Your saved phone number:</h4>
+        <input @bind-value="PhoneNumberText">
+        <button @onclick="SavePhoneNumber">Save</button>
+        <div>Encoded phone number: @PhoneNumberEncodedText</div>
     </Authorized>
     <NotAuthorized>
         <h1>Hello, world!</h1>
@@ -11,4 +18,30 @@
     </NotAuthorized>
 </AuthorizeView>
 
-<SurveyPrompt Title="How is Blazor working for you?"/>
+@code{
+    public string PhoneNumberText { get; set; }
+
+    public string PhoneNumberEncodedText { get; set; }
+    
+    private WebStorageUser user;
+    
+    protected override async void OnInitialized()
+    {
+        var authResult = authenticationStateProvider.GetAuthenticationStateAsync().Result;
+        if (authResult.User.Identity is not null)
+        {
+            return;
+        }
+        var claimsPrincipal = authResult.User;
+        user= userManager.Users.First(u => u.UserName == claimsPrincipal.Identity.Name);
+
+        PhoneNumberText = await userManager.GetPhoneNumberAsync(user);
+        PhoneNumberEncodedText = user.PhoneNumber;
+    }
+
+    public async Task SavePhoneNumber()
+    {
+        await userManager.SetPhoneNumberAsync(user, PhoneNumberText);
+        PhoneNumberEncodedText = user.PhoneNumber;
+    }
+}

@@ -20,6 +20,7 @@ namespace web_storage
 {
     using System.IO;
     using Areas;
+    using Azure.Identity;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
     using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
@@ -41,16 +42,12 @@ namespace web_storage
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<WebStorageUser>(options =>
-                {
-                    options.SignIn.RequireConfirmedAccount = true;
-                    
-                })
+            services.AddDefaultIdentity<WebStorageUser>(options => { options.SignIn.RequireConfirmedAccount = true; })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddPasswordValidator<LoginPasswordMatchingValidator<WebStorageUser>>()
                 .AddPasswordValidator<CommonPasswordUsageValidator<WebStorageUser>>()
                 .AddUserStore<EncodedUserStore<WebStorageUser>>();
-            
+
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -65,10 +62,10 @@ namespace web_storage
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider,
-                    RevalidatingIdentityAuthenticationStateProvider<WebStorageUser>>();
+                RevalidatingIdentityAuthenticationStateProvider<WebStorageUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<WeatherForecastService>();
-            
+
             services.AddScoped<IPasswordHasher<WebStorageUser>, ArgonSha3PasswordHasher<WebStorageUser>>();
             services.Configure<ArgonSha3PasswordHasherOptions>(options =>
             {
@@ -76,8 +73,17 @@ namespace web_storage
                 options.Sha3BitLength = 512;
             });
 
+            var connectionString =
+                "BlobEndpoint=https://kpisadsstorage.blob.core.windows.net/;QueueEndpoint=https://kpisadsstorage.queue.core.windows.net/;FileEndpoint=https://kpisadsstorage.file.core.windows.net/;TableEndpoint=https://kpisadsstorage.table.core.windows.net/;SharedAccessSignature=sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2021-12-28T17:15:57Z&st=2021-12-28T09:15:57Z&sip=0.0.0.0-255.255.255.255&spr=https,http&sig=rzwaSevbsGzRdi6vBBSynL%2BtYMh%2FVETsDoACe4X81OI%3D";
+            var containerName = "key-web-storage-container";
+            var blobName = "database-key-blob";
+
             services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(@"/keys/"))
+                .PersistKeysToAzureBlobStorage(connectionString, containerName, blobName)
+                .ProtectKeysWithAzureKeyVault(
+                    new Uri(
+                        "https://kpi-sads-key-vault.vault.azure.net/keys/sads-vault-key-rsa/502643d5b0784121ac64140bb05ab94f"),
+                    new DefaultAzureCredential())
                 .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
                 {
                     EncryptionAlgorithm = EncryptionAlgorithm.AES_256_GCM
